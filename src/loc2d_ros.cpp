@@ -53,6 +53,7 @@ lama::Loc2DROS::Loc2DROS()
     pnh_.param("use_map_topic", use_map_topic_, false);
     pnh_.param("first_map_only", first_map_only_, false);
     pnh_.param("use_pose_on_new_map", use_pose_on_new_map_, false);
+    pnh_.param("force_init_pose_on_first_map", force_init_pose_on_first_map_, false);
 
     pnh_.param("force_update_on_initial_pose", force_update_on_initial_pose_, false);
 
@@ -268,7 +269,17 @@ void lama::Loc2DROS::onMapReceived(const nav_msgs::OccupancyGridConstPtr& msg)
 {
     if (first_map_only_ and first_map_received_)
         return;
-    InitLoc2DFromOccupancyGridMsg(use_pose_on_new_map_ ? loc2d_.getPose() : initial_prior_, *msg);
+
+    if (first_map_received_) {
+        InitLoc2DFromOccupancyGridMsg(use_pose_on_new_map_ ? loc2d_.getPose() : initial_prior_, *msg);
+    } else {
+	if (force_init_pose_on_first_map_) { // use initial pose params
+            InitLoc2DFromOccupancyGridMsg(initial_prior_, *msg);
+	} else { // try to localize globally
+            InitLoc2DFromOccupancyGridMsg(use_pose_on_new_map_ ? loc2d_.getPose() : initial_prior_, *msg);
+	}
+    }
+    ROS_INFO("Initialization on new map finished");
 }
 
 void lama::Loc2DROS::InitLoc2DFromOccupancyGridMsg(const Pose2D& prior, const nav_msgs::OccupancyGrid& msg)

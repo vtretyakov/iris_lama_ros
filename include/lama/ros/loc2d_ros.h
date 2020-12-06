@@ -136,6 +136,7 @@ private:
     bool use_pose_on_new_map_; ///< True to use the current algorithm pose when the map changes
     bool force_update_; ///< True to force an update when a new laser scan is received
     bool force_update_on_initial_pose_; ///< True to trigger a forced updated when an initial pose is received
+    bool force_init_pose_on_first_map_; ///< Use configured initial pose instead of global estimate when first map recieved
 
     // == Inner state ==
     Loc2D   loc2d_;
