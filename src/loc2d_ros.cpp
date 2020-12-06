@@ -72,6 +72,7 @@ lama::Loc2DROS::Loc2DROS()
 
     // Set publishers
     pose_pub_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("/pose", 10);
+    init_done_pub_ = nh_.advertise<std_msgs::Bool>("/loc2d_init_done", 1);
 
     // Services
     srv_update_ = nh_.advertiseService("/request_nomotion_update", &Loc2DROS::onTriggerUpdate, this);
@@ -97,6 +98,9 @@ lama::Loc2DROS::Loc2DROS()
     options_.gloc_iters= dummy;
 
     pnh_.param("gloc_thresh", options_.gloc_thresh, 0.15);
+
+    init_done_msg_.data = false;
+    init_done_pub_.publish(init_done_msg_);
 
     // Request the map if not using the map topic
     if (not use_map_topic_)
@@ -130,6 +134,8 @@ lama::Loc2DROS::Loc2DROS()
     }
 
     ROS_INFO("2D Localization node up and running");
+    init_done_msg_.data = true;
+    init_done_pub_.publish(init_done_msg_);
 }
 
 lama::Loc2DROS::~Loc2DROS()
@@ -270,6 +276,8 @@ void lama::Loc2DROS::onMapReceived(const nav_msgs::OccupancyGridConstPtr& msg)
     if (first_map_only_ and first_map_received_)
         return;
 
+    init_done_msg_.data = false;
+    init_done_pub_.publish(init_done_msg_);
     if (first_map_received_) {
         InitLoc2DFromOccupancyGridMsg(use_pose_on_new_map_ ? loc2d_.getPose() : initial_prior_, *msg);
     } else {
@@ -280,6 +288,8 @@ void lama::Loc2DROS::onMapReceived(const nav_msgs::OccupancyGridConstPtr& msg)
 	}
     }
     ROS_INFO("Initialization on new map finished");
+    init_done_msg_.data = true;
+    init_done_pub_.publish(init_done_msg_);
 }
 
 void lama::Loc2DROS::InitLoc2DFromOccupancyGridMsg(const Pose2D& prior, const nav_msgs::OccupancyGrid& msg)

@@ -25,6 +25,7 @@ find_package(catkin REQUIRED COMPONENTS
     rosbag_storage
     iris_lama
     std_srvs
+    std_msgs
 )
 
 catkin_package()

@@ -53,6 +53,8 @@
 // Force triggering a no-motion update and global localization.
 #include <std_srvs/Empty.h>
 
+#include <std_msgs/Bool.h>
+
 #include <lama/pose3d.h>
 #include <lama/loc2d.h>
 
@@ -108,6 +110,7 @@ private:
 
     // Publishers
     ros::Publisher pose_pub_; ///< Publishers of the pose with covariance
+    ros::Publisher init_done_pub_; ///< Publisher of initialization complete
 
     // Subscribers
     ros::Subscriber pose_sub_;   ///< Subscriber of the initial pose (with covariance)
@@ -143,6 +146,7 @@ private:
     Pose2D odom_;
     Loc2D::Options options_;
     Pose2D initial_prior_;
+    std_msgs::Bool init_done_msg_;
 };
 
 } /* lama */
